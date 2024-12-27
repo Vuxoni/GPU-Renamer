@@ -98,8 +98,13 @@ def get_pci_root():
     gfxutil_path = './gfxutil'
 
     if not os.access(gfxutil_path, os.X_OK):
-        print("gfxutil is not executable. Please check the file permissions.")
-        return None
+        try:
+            st = os.stat(gfxutil_path)
+            os.chmod(gfxutil_path, st.st_mode | stat.S_IEXEC)
+            print(f"gfxutil was not executable, but it is now.")
+        except Exception as e:
+            print(f"Failed to make gfxutil executable: {e}")
+            return None
     try: 
         result = subprocess.run(["./gfxutil", "-f", "display"], capture_output=True, text=True)
         output = result.stdout.strip()
